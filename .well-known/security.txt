@@ -1,0 +1,6 @@
+# Security contact for SworfishGuard (RFC 9116)
+Contact: https://github.com/xSworfish-code/sworfishguard/security/advisories/new
+Expires: 2027-10-24T00:00:00.000Z
+Preferred-Languages: es, en
+Policy: https://github.com/xSworfish-code/sworfishguard/blob/main/SECURITY.md
+Canonical: https://xsworfish-code.github.io/sworfishguard/.well-known/security.txt
