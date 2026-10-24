@@ -1,0 +1,16 @@
+{
+  "name": "sworfishguard",
+  "version": "1.0.0",
+  "description": "Client-side cybersecurity toolkit: password analyzer, breach checker (k-anonymity), passphrase generator, phishing link and scam message detector, file fingerprints, security checkup.",
+  "private": true,
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\"",
+    "start": "npx --yes serve ."
+  },
+  "keywords": ["cybersecurity", "password", "phishing", "haveibeenpwned", "k-anonymity", "security-tools"],
+  "author": "Asaf Rojas (Sworfish Tech)",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  }
+}

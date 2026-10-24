@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SworfishGuard — revisa antes de confiar</title>
+  <meta name="description" content="SworfishGuard: password analyzer, breach checker, passphrase generator, phishing link and scam message detector, file fingerprints. 100% client-side and open source.">
+  <meta name="author" content="Asaf Rojas — Sworfish Tech">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191919" media="(prefers-color-scheme: dark)">
+  <!--
+    Strict Content Security Policy:
+    - scripts, styles and fonts only from this site (no CDNs, no Google Fonts)
+    - the only network request allowed is the Have I Been Pwned range API
+    - no plugins, no <base> tag tricks, no form submissions anywhere
+    - Trusted Types: the browser itself blocks any attempt to inject HTML
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file:; font-src 'self' file:; img-src 'self' data:; connect-src https://api.pwnedpasswords.com; base-uri 'none'; form-action 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23000'/%3E%3Cpath d='M16 6.5 9 9.3v5.2c0 4.6 3 8.3 7 9.5 4-1.2 7-4.9 7-9.5V9.3z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='m12.8 15.6 2.3 2.3 4.3-4.6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-mode="basic">
+  <a class="skip-link" href="#workspace" data-i18n="skip"></a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="#top" aria-label="SworfishGuard">
+        <svg viewBox="0 0 32 32" aria-hidden="true" class="logo-mark">
+          <rect width="32" height="32" rx="7" class="logo-bg"/>
+          <path d="M16 6.5 9 9.3v5.2c0 4.6 3 8.3 7 9.5 4-1.2 7-4.9 7-9.5V9.3z" class="logo-line"/>
+          <path d="m12.8 15.6 2.3 2.3 4.3-4.6" class="logo-line"/>
+        </svg>
+        <span>SworfishGuard</span>
+      </a>
+      <nav class="header-nav" aria-label="Main">
+        <a class="btn-ghost" href="#workspace" data-i18n="nav.tools"></a>
+        <a class="btn-ghost" href="#privacy" data-i18n="nav.privacy"></a>
+      </nav>
+      <div class="header-actions">
+        <div class="segmented" role="group" data-i18n-aria="mode.label">
+          <button type="button" data-set-mode="basic" data-i18n="mode.basic"></button>
+          <button type="button" data-set-mode="expert" data-i18n="mode.expert"></button>
+        </div>
+        <div class="segmented lang" role="group" data-i18n-aria="lang.label">
+          <button type="button" data-set-lang="es" lang="es">ES</button>
+          <button type="button" data-set-lang="en" lang="en">EN</button>
+        </div>
+        <a class="btn btn-primary header-cta repo-link" href="https://github.com/" rel="noopener noreferrer" data-i18n="nav.source"></a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ============================== HERO ============================== -->
+    <section class="hero">
+      <span class="pill" data-i18n="hero.pill"></span>
+      <h1 data-i18n="hero.title"></h1>
+      <p class="hero-body" data-i18n="hero.body"></p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary btn-lg" href="#analyzer" data-goto="analyzer" data-i18n="hero.cta1"></a>
+        <a class="btn btn-secondary btn-lg" href="#scam" data-goto="scam" data-i18n="hero.cta2"></a>
+      </div>
+    </section>
+
+    <!-- ============================ WORKSPACE =========================== -->
+    <section class="workspace" id="workspace" tabindex="-1">
+      <div class="window" role="region" data-i18n-aria="window.label">
+        <aside class="sidebar">
+          <div class="workspace-name">
+            <span class="ws-avatar" aria-hidden="true">S</span>
+            <span>SworfishGuard</span>
+          </div>
+          <nav class="page-nav" aria-label="Tools">
+            <p class="nav-group" data-i18n="group.passwords"></p>
+            <button type="button" class="nav-item" data-page="analyzer" aria-controls="page-analyzer"><span class="emoji" aria-hidden="true">🔑</span><span data-i18n="page.analyzer"></span></button>
+            <button type="button" class="nav-item" data-page="breach" aria-controls="page-breach"><span class="emoji" aria-hidden="true">💧</span><span data-i18n="page.breach"></span></button>
+            <button type="button" class="nav-item" data-page="generator" aria-controls="page-generator"><span class="emoji" aria-hidden="true">🎲</span><span data-i18n="page.generator"></span></button>
+            <p class="nav-group" data-i18n="group.links"></p>
+            <button type="button" class="nav-item" data-page="phishing" aria-controls="page-phishing"><span class="emoji" aria-hidden="true">🔗</span><span data-i18n="page.phishing"></span></button>
+            <button type="button" class="nav-item" data-page="scam" aria-controls="page-scam"><span class="emoji" aria-hidden="true">💬</span><span data-i18n="page.scam"></span></button>
+            <p class="nav-group" data-i18n="group.files"></p>
+            <button type="button" class="nav-item" data-page="hash" aria-controls="page-hash"><span class="emoji" aria-hidden="true">🧬</span><span data-i18n="page.hash"></span></button>
+            <p class="nav-group" data-i18n="group.learn"></p>
+            <button type="button" class="nav-item" data-page="checkup" aria-controls="page-checkup"><span class="emoji" aria-hidden="true">✅</span><span data-i18n="page.checkup"></span></button>
+            <button type="button" class="nav-item" data-page="glossary" aria-controls="page-glossary"><span class="emoji" aria-hidden="true">📖</span><span data-i18n="page.glossary"></span></button>
+          </nav>
+        </aside>
+
+        <div class="pages">
+          <!-- ======================= ANALYZER ======================= -->
+          <section class="page" id="page-analyzer" data-page-id="analyzer" aria-labelledby="h-analyzer">
+            <div class="page-icon" aria-hidden="true">🔑</div>
+            <h2 class="page-title" id="h-analyzer" data-i18n="an.title"></h2>
+            <p class="lead" data-i18n="an.lead"></p>
+
+            <label class="field-label" for="an-input" data-i18n="an.label"></label>
+            <div class="input-row">
+              <input id="an-input" class="input mono" type="password" maxlength="256" autocomplete="off" autocapitalize="off" spellcheck="false" data-sensitive data-i18n-placeholder="an.placeholder">
+              <button type="button" class="icon-btn" data-toggle-visibility="an-input" data-i18n-aria="common.show"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button type="button" class="icon-btn" data-clear="an-input" data-i18n-aria="common.clear"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+            </div>
+
+            <div class="meter" id="an-meter" data-score="-1" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            <p class="meter-label" id="an-score" aria-live="polite"></p>
+            <p class="empty" id="an-empty" data-i18n="an.empty"></p>
+
+            <div id="an-results" hidden>
+              <div class="stat-grid">
+                <div class="stat"><span class="stat-label" data-i18n="an.online"></span><strong id="an-online"></strong><small data-i18n="an.onlineHint"></small></div>
+                <div class="stat"><span class="stat-label" data-i18n="an.offline"></span><strong id="an-offline"></strong><small data-i18n="an.offlineHint"></small></div>
+                <div class="stat"><span class="stat-label" data-i18n="an.entropy"></span><strong id="an-entropy"></strong><small data-i18n="an.bits"></small></div>
+                <div class="stat"><span class="stat-label" data-i18n="an.length"></span><strong id="an-length"></strong><small data-i18n="an.chars"></small></div>
+              </div>
+
+              <h3 class="block-title" data-i18n="an.classes"></h3>
+              <div class="tags" id="an-classes"></div>
+
+              <div class="two-col">
+                <div>
+                  <h3 class="block-title" data-i18n="an.patterns"></h3>
+                  <ul class="rows" id="an-patterns"></ul>
+                </div>
+                <div>
+                  <h3 class="block-title" data-i18n="an.suggestions"></h3>
+                  <ul class="todo" id="an-feedback"></ul>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary" id="an-to-breach" data-i18n="an.toBreach"></button>
+
+              <details class="toggle x-only" data-expert>
+                <summary data-i18n="common.expert"></summary>
+                <p data-i18n="an.x"></p>
+                <dl class="props" id="an-x-props"></dl>
+                <table class="data-table" id="an-x-table"><caption data-i18n="an.x.table"></caption><tbody></tbody></table>
+              </details>
+            </div>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="an.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= BREACH ======================= -->
+          <section class="page" id="page-breach" data-page-id="breach" aria-labelledby="h-breach" hidden>
+            <div class="page-icon" aria-hidden="true">💧</div>
+            <h2 class="page-title" id="h-breach" data-i18n="br.title"></h2>
+            <p class="lead" data-i18n="br.lead"></p>
+
+            <form id="br-form" novalidate>
+              <label class="field-label" for="br-input" data-i18n="br.label"></label>
+              <div class="input-row">
+                <input id="br-input" class="input mono" type="password" maxlength="256" autocomplete="off" autocapitalize="off" spellcheck="false" data-sensitive>
+                <button type="button" class="icon-btn" data-toggle-visibility="br-input" data-i18n-aria="common.show"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                <button type="submit" class="btn btn-primary" id="br-button" data-i18n="br.button"></button>
+              </div>
+            </form>
+
+            <div class="result" id="br-result" aria-live="polite" hidden></div>
+
+            <div class="hash-viz" id="br-hash" hidden>
+              <span class="field-label" data-i18n="br.hashLabel"></span>
+              <code class="hash-code"><mark id="br-prefix"></mark><span id="br-suffix"></span></code>
+              <div class="legend">
+                <span><i class="swatch sent"></i><span data-i18n="br.sent"></span></span>
+                <span><i class="swatch kept"></i><span data-i18n="br.kept"></span></span>
+              </div>
+            </div>
+
+            <details class="toggle x-only" data-expert>
+              <summary data-i18n="common.expert"></summary>
+              <p data-i18n="br.x"></p>
+              <dl class="props" id="br-x-props"></dl>
+            </details>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="br.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= GENERATOR ======================= -->
+          <section class="page" id="page-generator" data-page-id="generator" aria-labelledby="h-generator" hidden>
+            <div class="page-icon" aria-hidden="true">🎲</div>
+            <h2 class="page-title" id="h-generator" data-i18n="gen.title"></h2>
+            <p class="lead" data-i18n="gen.lead"></p>
+
+            <div class="segmented big" role="radiogroup" data-i18n-aria="gen.type">
+              <button type="button" role="radio" data-gen-type="passphrase" data-i18n="gen.typePassphrase"></button>
+              <button type="button" role="radio" data-gen-type="password" data-i18n="gen.typePassword"></button>
+            </div>
+
+            <div class="gen-box">
+              <output id="gen-output" class="mono" aria-live="polite"></output>
+              <div class="gen-actions">
+                <button type="button" class="btn btn-primary" id="gen-copy" data-i18n="gen.copy"></button>
+                <button type="button" class="btn btn-secondary-2" id="gen-new" data-i18n="gen.regenerate"></button>
+              </div>
+            </div>
+            <div class="gen-strength">
+              <div class="meter small" id="gen-meter" data-score="-1" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+              <span id="gen-meta"></span>
+            </div>
+
+            <div class="options" id="gen-pp-opts">
+              <label class="slider"><span><span data-i18n="gen.words"></span>: <b id="gen-words-value">6</b></span>
+                <input type="range" id="gen-words" min="4" max="10" value="6"></label>
+              <label class="select-field"><span data-i18n="gen.separator"></span>
+                <select id="gen-sep" class="input">
+                  <option value="-" data-i18n="gen.sepDash"></option>
+                  <option value="." data-i18n="gen.sepDot"></option>
+                  <option value="_" data-i18n="gen.sepUnderscore"></option>
+                  <option value=" " data-i18n="gen.sepSpace"></option>
+                </select></label>
+              <label class="check"><input type="checkbox" id="gen-cap"> <span data-i18n="gen.capitalize"></span></label>
+              <label class="check"><input type="checkbox" id="gen-num" checked> <span data-i18n="gen.addNumber"></span></label>
+            </div>
+
+            <div class="options" id="gen-pw-opts" hidden>
+              <label class="slider"><span><span data-i18n="gen.length"></span>: <b id="gen-length-value">18</b></span>
+                <input type="range" id="gen-length" min="8" max="64" value="18"></label>
+              <label class="check"><input type="checkbox" id="gen-lower" checked> <span data-i18n="gen.lower"></span></label>
+              <label class="check"><input type="checkbox" id="gen-upper" checked> <span data-i18n="gen.upper"></span></label>
+              <label class="check"><input type="checkbox" id="gen-digits" checked> <span data-i18n="gen.digits"></span></label>
+              <label class="check"><input type="checkbox" id="gen-symbols" checked> <span data-i18n="gen.symbols"></span></label>
+              <label class="check"><input type="checkbox" id="gen-ambiguous"> <span data-i18n="gen.ambiguous"></span></label>
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="gen-analyze" data-i18n="gen.analyze"></button>
+
+            <details class="toggle x-only" data-expert>
+              <summary data-i18n="common.expert"></summary>
+              <p data-i18n="gen.x"></p>
+              <dl class="props" id="gen-x-props"></dl>
+            </details>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="gen.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= PHISHING ======================= -->
+          <section class="page" id="page-phishing" data-page-id="phishing" aria-labelledby="h-phishing" hidden>
+            <div class="page-icon" aria-hidden="true">🔗</div>
+            <h2 class="page-title" id="h-phishing" data-i18n="ph.title"></h2>
+            <p class="lead" data-i18n="ph.lead"></p>
+
+            <form id="ph-form" novalidate>
+              <label class="field-label" for="ph-input" data-i18n="ph.label"></label>
+              <div class="input-row">
+                <input id="ph-input" class="input mono" type="text" inputmode="url" maxlength="2048" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-placeholder="ph.placeholder">
+                <button type="submit" class="btn btn-primary" data-i18n="ph.button"></button>
+              </div>
+            </form>
+            <div class="examples">
+              <span data-i18n="ph.examples"></span>
+              <button type="button" class="chip" data-example="ph" data-value="https://bancatlan.hn.verificar-cuenta.top/acceso">bancatlan.hn.verificar-cuenta.top</button>
+              <button type="button" class="chip" data-example="ph" data-value="https://ficohsa-seguridad.xyz/ingreso">ficohsa-seguridad.xyz</button>
+              <button type="button" class="chip" data-example="ph" data-value="https://steamcommunlty.com/tradeoffer/new">steamcommunlty.com</button>
+              <button type="button" class="chip" data-example="ph" data-value="https://xn--80ak6aa92e.com">xn--80ak6aa92e.com</button>
+              <button type="button" class="chip" data-example="ph" data-value="https://www.bancatlan.hn">www.bancatlan.hn</button>
+            </div>
+
+            <div id="ph-result" hidden>
+              <div class="verdict" id="ph-verdict">
+                <span class="verdict-dot" aria-hidden="true"></span>
+                <div class="verdict-text">
+                  <strong id="ph-level"></strong>
+                  <p id="ph-hint"></p>
+                </div>
+                <span class="verdict-score" id="ph-score"></span>
+              </div>
+              <div class="real-domain" id="ph-real">
+                <span data-i18n="ph.realDomain"></span>
+                <strong class="mono" id="ph-real-domain"></strong>
+              </div>
+              <h3 class="block-title" data-i18n="ph.findings"></h3>
+              <ul class="rows findings" id="ph-findings"></ul>
+
+              <details class="toggle x-only" data-expert>
+                <summary data-i18n="common.expert"></summary>
+                <p id="ph-x-desc"></p>
+                <dl class="props" id="ph-x-props"></dl>
+                <table class="data-table" id="ph-x-breakdown"><caption data-i18n="ph.x.breakdown"></caption><tbody></tbody></table>
+              </details>
+            </div>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="ph.b"></p></div></aside>
+            <p class="fine-print" data-i18n="ph.disclaimer"></p>
+          </section>
+
+          <!-- ======================= SCAM ======================= -->
+          <section class="page" id="page-scam" data-page-id="scam" aria-labelledby="h-scam" hidden>
+            <div class="page-icon" aria-hidden="true">💬</div>
+            <h2 class="page-title" id="h-scam" data-i18n="sc.title"></h2>
+            <p class="lead" data-i18n="sc.lead"></p>
+
+            <form id="sc-form" novalidate>
+              <label class="field-label" for="sc-input" data-i18n="sc.label"></label>
+              <textarea id="sc-input" class="input" rows="5" maxlength="5000" spellcheck="false" data-i18n-placeholder="sc.placeholder"></textarea>
+              <div class="form-actions"><button type="submit" class="btn btn-primary" data-i18n="sc.button"></button></div>
+            </form>
+            <div class="examples">
+              <span data-i18n="sc.examples"></span>
+              <button type="button" class="chip" data-example="sc" data-key="bank" data-i18n="sc.ex.bank"></button>
+              <button type="button" class="chip" data-example="sc" data-key="family" data-i18n="sc.ex.family"></button>
+              <button type="button" class="chip" data-example="sc" data-key="package" data-i18n="sc.ex.package"></button>
+              <button type="button" class="chip" data-example="sc" data-key="code" data-i18n="sc.ex.code"></button>
+              <button type="button" class="chip" data-example="sc" data-key="legit" data-i18n="sc.ex.legit"></button>
+            </div>
+
+            <div id="sc-result" hidden>
+              <div class="verdict" id="sc-verdict">
+                <span class="verdict-dot" aria-hidden="true"></span>
+                <div class="verdict-text">
+                  <strong id="sc-level"></strong>
+                  <p id="sc-hint"></p>
+                </div>
+                <span class="verdict-score" id="sc-score"></span>
+              </div>
+              <p class="fine-print" id="sc-truncated" hidden data-i18n="sc.truncated"></p>
+              <h3 class="block-title" data-i18n="sc.findings"></h3>
+              <ul class="rows findings" id="sc-findings"></ul>
+              <h3 class="block-title" data-i18n="sc.links"></h3>
+              <ul class="rows" id="sc-links"></ul>
+
+              <details class="toggle x-only" data-expert>
+                <summary data-i18n="common.expert"></summary>
+                <p data-i18n="sc.x"></p>
+                <table class="data-table" id="sc-x-breakdown"><caption data-i18n="ph.x.breakdown"></caption><tbody></tbody></table>
+              </details>
+            </div>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="sc.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= FILE HASH ======================= -->
+          <section class="page" id="page-hash" data-page-id="hash" aria-labelledby="h-hash" hidden>
+            <div class="page-icon" aria-hidden="true">🧬</div>
+            <h2 class="page-title" id="h-hash" data-i18n="fh.title"></h2>
+            <p class="lead" data-i18n="fh.lead"></p>
+
+            <label class="dropzone" id="fh-drop" for="fh-file">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+              <span class="dz-title" data-i18n="fh.drop"></span>
+              <span class="dz-sub"><span data-i18n="fh.or"></span> <span class="link-like" data-i18n="fh.pick"></span></span>
+              <span class="dz-limit" data-i18n="fh.limit"></span>
+              <input type="file" id="fh-file" class="visually-hidden">
+            </label>
+
+            <label class="field-label" for="fh-expected" data-i18n="fh.expected"></label>
+            <input id="fh-expected" class="input mono" type="text" maxlength="200" autocomplete="off" spellcheck="false" data-i18n-placeholder="fh.expectedPlaceholder">
+
+            <p class="status-line" id="fh-status" aria-live="polite"></p>
+            <div class="result" id="fh-compare" aria-live="polite" hidden></div>
+
+            <div id="fh-result" hidden>
+              <dl class="props" id="fh-props"></dl>
+              <ul class="hash-list" id="fh-hashes"></ul>
+              <details class="toggle x-only" data-expert>
+                <summary data-i18n="common.expert"></summary>
+                <p data-i18n="fh.x"></p>
+                <dl class="props" id="fh-x-props"></dl>
+              </details>
+            </div>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="fh.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= CHECKUP ======================= -->
+          <section class="page" id="page-checkup" data-page-id="checkup" aria-labelledby="h-checkup" hidden>
+            <div class="page-icon" aria-hidden="true">✅</div>
+            <h2 class="page-title" id="h-checkup" data-i18n="ck.title"></h2>
+            <p class="lead" data-i18n="ck.lead"></p>
+
+            <div class="ck-summary" id="ck-summary">
+              <div class="ck-score"><span class="stat-label" data-i18n="ck.score"></span><strong id="ck-score">—</strong></div>
+              <div class="ck-summary-text">
+                <p id="ck-level"></p>
+                <div class="progress"><i id="ck-bar"></i></div>
+                <small id="ck-progress"></small>
+              </div>
+            </div>
+
+            <ol class="questions" id="ck-list"></ol>
+
+            <h3 class="block-title" data-i18n="ck.plan"></h3>
+            <ol class="plan" id="ck-plan"></ol>
+
+            <div class="ck-footer">
+              <label class="check"><input type="checkbox" id="ck-remember"> <span data-i18n="ck.remember"></span></label>
+              <button type="button" class="btn-ghost" id="ck-reset" data-i18n="ck.reset"></button>
+            </div>
+            <details class="toggle x-only" data-expert>
+              <summary data-i18n="common.expert"></summary>
+              <p data-i18n="ck.x"></p>
+            </details>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="ck.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= GLOSSARY ======================= -->
+          <section class="page" id="page-glossary" data-page-id="glossary" aria-labelledby="h-glossary" hidden>
+            <div class="page-icon" aria-hidden="true">📖</div>
+            <h2 class="page-title" id="h-glossary" data-i18n="gl.title"></h2>
+            <p class="lead" data-i18n="gl.lead"></p>
+            <input id="gl-search" class="input" type="search" maxlength="60" autocomplete="off" data-i18n-placeholder="gl.search" data-i18n-aria="gl.search">
+            <div class="glossary" id="gl-list"></div>
+            <p class="empty" id="gl-none" hidden data-i18n="gl.none"></p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ PRIVACY ============================= -->
+    <section class="band" id="privacy">
+      <div class="band-inner">
+        <h2 class="section-title" data-i18n="pv.title"></h2>
+        <p class="section-lead" data-i18n="pv.lead"></p>
+        <div class="card-grid">
+          <article class="card"><span class="card-icon" aria-hidden="true">🖥️</span><h3 data-i18n="pv.1.title"></h3><p data-i18n="pv.1.body"></p></article>
+          <article class="card"><span class="card-icon" aria-hidden="true">🫥</span><h3 data-i18n="pv.2.title"></h3><p data-i18n="pv.2.body"></p></article>
+          <article class="card"><span class="card-icon" aria-hidden="true">🛡️</span><h3 data-i18n="pv.3.title"></h3><p data-i18n="pv.3.body"></p></article>
+          <article class="card"><span class="card-icon" aria-hidden="true">📂</span><h3 data-i18n="pv.4.title"></h3><p data-i18n="pv.4.body"></p></article>
+        </div>
+        <blockquote class="editorial" data-i18n="pv.quote"></blockquote>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a class="logo" href="#top" aria-label="SworfishGuard">
+          <svg viewBox="0 0 32 32" aria-hidden="true" class="logo-mark">
+            <rect width="32" height="32" rx="7" class="logo-bg"/>
+            <path d="M16 6.5 9 9.3v5.2c0 4.6 3 8.3 7 9.5 4-1.2 7-4.9 7-9.5V9.3z" class="logo-line"/>
+            <path d="m12.8 15.6 2.3 2.3 4.3-4.6" class="logo-line"/>
+          </svg>
+          <span>SworfishGuard</span>
+        </a>
+        <p class="footer-editorial" data-i18n="ft.by"></p>
+      </div>
+      <nav class="footer-col" aria-labelledby="ft-tools">
+        <p class="footer-head" id="ft-tools" data-i18n="ft.tools"></p>
+        <a href="#analyzer" data-goto="analyzer" data-i18n="page.analyzer"></a>
+        <a href="#phishing" data-goto="phishing" data-i18n="page.phishing"></a>
+        <a href="#scam" data-goto="scam" data-i18n="page.scam"></a>
+        <a href="#checkup" data-goto="checkup" data-i18n="page.checkup"></a>
+      </nav>
+      <nav class="footer-col" aria-labelledby="ft-project">
+        <p class="footer-head" id="ft-project" data-i18n="ft.project"></p>
+        <a class="repo-link" href="https://github.com/" rel="noopener noreferrer" data-i18n="nav.source"></a>
+        <a href="SECURITY.md" data-i18n="ft.security"></a>
+        <a href="LICENSE" data-i18n="ft.license"></a>
+      </nav>
+    </div>
+    <p class="footer-note" data-i18n="ft.note"></p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/brands.js"></script>
+  <script src="js/wordlists.js"></script>
+  <script src="js/password-analyzer.js"></script>
+  <script src="js/breach-check.js"></script>
+  <script src="js/generator.js"></script>
+  <script src="js/phishing-detector.js"></script>
+  <script src="js/scam-detector.js"></script>
+  <script src="js/file-hash.js"></script>
+  <script src="js/checkup.js"></script>
+  <script src="js/glossary.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
