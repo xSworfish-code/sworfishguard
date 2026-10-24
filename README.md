@@ -1,14 +1,14 @@
 # SworfishGuard
 
-![Tests](https://github.com/TU-USUARIO/sworfishguard/actions/workflows/tests.yml/badge.svg)
-![CodeQL](https://github.com/TU-USUARIO/sworfishguard/actions/workflows/codeql.yml/badge.svg)
+![Tests](https://github.com/xSworfish-code/sworfishguard/actions/workflows/tests.yml/badge.svg)
+![CodeQL](https://github.com/xSworfish-code/sworfishguard/actions/workflows/codeql.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-0075DE.svg)
 
 This is one of my first projects. I'm a high school student from Honduras and I want to study computer science and specialize in cybersecurity, so I decided to build something I could actually use and learn from at the same time.
 
 SworfishGuard is a small set of security tools that run in the browser. You can check a password, a link, a weird message you got on WhatsApp or a file you downloaded, and it tells you what it found and why. Everything happens on your own device. Nothing gets saved or sent to a server.
 
-Live demo: https://TU-USUARIO.github.io/sworfishguard/
+Live demo: https://xsworfish-code.github.io/sworfishguard/
 
 [Leer en español](#español)
 
