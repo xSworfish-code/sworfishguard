@@ -12,6 +12,7 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const jsDir = path.join(root, 'js');
 const jsFiles = fs.readdirSync(jsDir).filter((f) => f.endsWith('.js'));
+const crypto = require('node:crypto');
 const strip = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1'); // remove comments
 
 test('no JavaScript file uses HTML injection sinks or eval', () => {
@@ -43,7 +44,7 @@ test('index.html has a strict Content Security Policy', () => {
 
 test('index.html has no inline scripts, inline styles or inline event handlers', () => {
   const scripts = html.match(/<script\b[^>]*>/g) || [];
-  for (const tag of scripts) assert.match(tag, /src="js\/[a-z0-9-]+\.js"/, 'external local script: ' + tag);
+  for (const tag of scripts) assert.match(tag, /src="js\/(vendor\/)?[A-Za-z0-9-]+\.js"/, 'external local script: ' + tag);
   assert.ok(!/<script\b[^>]*>\s*\S/.test(html.replace(/<script\b[^>]*src=[^>]*><\/script>/g, '')), 'no inline <script> content');
   assert.ok(!/\sstyle="/.test(html), 'no style="" attributes');
   assert.ok(!/<style\b/.test(html), 'no <style> blocks');
@@ -90,4 +91,30 @@ test('glossary terms exist in both languages and both levels', () => {
   for (const t of terms) for (const lang of ['es', 'en']) for (const k of ['term', 'basic', 'expert']) {
     assert.ok(t[lang][k] && t[lang][k].length > 3, `${t.id}.${lang}.${k}`);
   }
+});
+
+test('the bundled QR library is exactly the reviewed jsQR 1.4.0 file', () => {
+  // If this fails, someone changed the third-party code: review it before updating the hash.
+  const buf = fs.readFileSync(path.join(jsDir, 'vendor', 'jsQR.js'));
+  assert.equal(crypto.createHash('sha256').update(buf).digest('hex'), 'bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859');
+  const src = buf.toString('utf8');
+  for (const re of [/innerHTML/, /\beval\s*\(/, /new\s+Function/, /XMLHttpRequest|fetch\s*\(/, /Math\.random/]) assert.ok(!re.test(src), 'jsQR matches ' + re);
+  assert.ok(fs.existsSync(path.join(jsDir, 'vendor', 'jsQR-LICENSE.txt')), 'license kept next to it');
+});
+
+test('the service worker is safe and only caches files that exist', () => {
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  assert.match(sw, /origin !== self\.location\.origin\) return/, 'never touches other sites (breach API)');
+  const files = [...sw.matchAll(/'([^']+\.(?:html|css|js|woff2|svg|png|webmanifest))'/g)].map((m) => m[1]);
+  assert.ok(files.length > 20);
+  for (const f of files) assert.ok(fs.existsSync(path.join(root, f)), 'missing ' + f);
+  for (const f of jsFiles) assert.ok(files.includes('js/' + f), 'sw.js does not cache js/' + f);
+  const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+  assert.match(csp, /trusted-types sg-sw;/, 'one Trusted Types policy, only for the service worker');
+  const app = fs.readFileSync(path.join(jsDir, 'app.js'), 'utf8');
+  assert.match(app, /createScriptURL: function \(u\) \{ if \(u === 'sw\.js'\) return u; throw/);
+});
+
+test('links opened from the page never leak the opener', () => {
+  for (const a of html.match(/<a\b[^>]*target="_blank"[^>]*>/g) || []) assert.match(a, /rel="noopener noreferrer"/, a);
 });

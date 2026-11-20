@@ -282,8 +282,11 @@
           return closeTo(labelPlain, c) || (looks !== labelPlain && (looks === c || (c.length >= 5 && looks.indexOf(c) !== -1)));
         });
 
+        var fullDomainInSub = b.domains.some(function (d) { return ('.' + subText + '.').indexOf('.' + d + '.') !== -1; });
         if (nearOfficial) {
           add('lookalike', 'critical', b.name);                                   // paypa1.com, steamcommunlty.com
+        } else if (fullDomainInSub) {
+          add('domainInSubdomain', 'critical', b.domains.filter(function (d) { return ('.' + subText + '.').indexOf('.' + d + '.') !== -1; })[0]); // steamcommunity.com.trade-offer.ru
         } else if (b.keywords.some(function (k) { return hasKeyword(subText, subTokens, k); })) {
           add('brandInSubdomain', 'high', b.name);                                // paypal.com.evil.xyz
         } else if (b.keywords.some(function (k) { return hasKeyword(labelPlain, labelTokens, k); })) {
@@ -309,7 +312,10 @@
     score = Math.min(score, 100);
     info.score = score;
     var hasCritical = findings.some(function (f) { return f.severity === 'critical'; });
-    info.level = (score >= 40 || hasCritical) ? 'high' : score >= 20 ? 'medium' : 'low';
+    var hidesDestination = findings.some(function (f) { return f.id === 'shortener'; });
+    // A risky ending (.xyz, .top...) plus any other sign is enough to call it suspicious.
+    var riskyPlus = findings.some(function (f) { return f.id === 'riskyTld'; }) && findings.filter(function (f) { return f.severity !== 'info'; }).length >= 2;
+    info.level = (score >= 40 || hasCritical) ? 'high' : (score >= 20 || hidesDestination || riskyPlus) ? 'medium' : 'low';
     info.official = findings.some(function (f) { return f.id === 'officialDomain'; }) &&
       !findings.some(function (f) { return f.id === 'freeHosting'; }) && score < 20;
     var order = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
@@ -318,12 +324,28 @@
     return info;
   }
 
+  // Endings accepted for links written without "http://" (so "hola.como" is not a link,
+  // but "steamcommunity.com.trade-offer.ru" is read whole, up to the real ending).
+  var TEXT_TLDS = ('com net org edu gov info biz hn mx gt sv ni cr pa co ve pe cl ec bo py uy ar br do pr cu es us uk ca ' +
+    'de fr it nl pt pl ru ua kz by su cn jp kr in id ph vn th my sg au nz za ng ke eg tr ir sa ae il ' +
+    'io me ly gl gg cc tv ws pw tk ml ga cf gq to fm am la xyz top online site link click shop store live app dev ' +
+    'bond help win cfd xin icu buzz cyou sbs rest cam monster support work fit zip mov club vip pro lat page web ' +
+    'cloud art blog news tech space website services finance bank email mobi asia').split(' ');
+
   /** Pulls every link-looking string out of a block of text (used by the scam detector). */
   function extractUrls(text) {
-    var re = /\b((?:https?:\/\/|www\.)[^\s<>"'()]+|(?:[a-z0-9-]+\.)+(?:com|net|org|hn|info|xyz|top|online|site|link|click|shop|me|ly|gl|co|io|app|live|bond|help|win|cfd|xin|icu|gg)(?:\/[^\s<>"'()]*)?)/gi;
+    var re = /\b((?:https?:\/\/|www\.)[^\s<>"'()]+|(?:[a-z0-9-]+\.)+[a-z][a-z0-9-]{1,23}(?:\/[^\s<>"'()]*)?)/gi;
     var out = [], m, s = String(text || '').slice(0, 10000);
     while ((m = re.exec(s)) !== null && out.length < 20) {
       var u = m[1].replace(/[.,;:!?)\]]+$/, '');
+      if (!/^(https?:\/\/|www\.)/i.test(u)) {
+        // Bare domain: the last label must be a real ending; otherwise back off one label at a time.
+        var host = u.split('/')[0], rest = u.slice(host.length);
+        var labels = host.split('.');
+        while (labels.length > 1 && TEXT_TLDS.indexOf(labels[labels.length - 1].toLowerCase()) === -1) { labels.pop(); rest = ''; }
+        if (labels.length < 2 || /^\d+$/.test(labels[0])) continue;
+        u = labels.join('.') + rest;
+      }
       if (out.indexOf(u) === -1) out.push(u);
     }
     return out;

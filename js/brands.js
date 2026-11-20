@@ -13,6 +13,11 @@
  *   - Tigo Honduras    -> tigo.com.hn
  *   - Claro Honduras   -> claro.com.hn
  *   - Honducor (Correos de Honduras) -> honducor.gob.hn
+ * Added in November 2026 (v1.1.0):
+ *   - Banco LAFISE     -> lafise.com              (developer site of its App Store app "LAFISE Bancanet")
+ *   - SAR (taxes)      -> sar.gob.hn              (the SAR's own published documents)
+ *   - RNP (ID cards)   -> rnp.hn                  (developer of its App Store app "SIN RNP": app.rnp.hn)
+ *   - ENEE (power)     -> enee.hn                 (Wikipedia: Empresa Nacional de Energía Eléctrica)
  *
  * Risky TLDs combine the Interisle "Phishing Landscape 2025" report (top
  * phishing scores: .xin, .bond, .help, .win, .cfd), Spamhaus domain reputation
@@ -31,11 +36,16 @@
   var BRANDS = [
     // --- Honduras: banks ------------------------------------------------------
     { name: 'Banco Atlántida', category: 'bank', country: 'HN', keywords: ['bancatlan', 'atlantida'], domains: ['bancatlan.hn'] },
-    { name: 'BAC Credomatic', category: 'bank', country: 'HN', keywords: ['baccredomatic', 'credomatic', 'bachonduras'], domains: ['baccredomatic.com'] },
+    { name: 'BAC Credomatic', category: 'bank', country: 'HN', keywords: ['baccredomatic', 'credomatic', 'bachonduras', 'bac'], domains: ['baccredomatic.com'] },
     { name: 'Ficohsa', category: 'bank', country: 'HN', keywords: ['ficohsa'], domains: ['ficohsa.hn', 'ficohsa.com'] },
     { name: 'Banpaís', category: 'bank', country: 'HN', keywords: ['banpais'], domains: ['banpais.hn', 'corporacionbi.com'] },
     { name: 'Banco de Occidente', category: 'bank', country: 'HN', keywords: ['bancocci', 'bancodeoccidente'], domains: ['bancocci.hn'] },
     { name: 'Davivienda', category: 'bank', country: 'HN', keywords: ['davivienda'], domains: ['davivienda.com.hn', 'davivienda.com'] },
+    { name: 'Banco LAFISE', category: 'bank', country: 'HN', keywords: ['lafise', 'bancanet'], domains: ['lafise.com'] },
+    // --- Honduras: government & public services -------------------------------
+    { name: 'SAR', category: 'government', country: 'HN', keywords: ['sar', 'sarhonduras'], domains: ['sar.gob.hn'] },
+    { name: 'RNP', category: 'government', country: 'HN', keywords: ['rnp', 'registronacional'], domains: ['rnp.hn'] },
+    { name: 'ENEE', category: 'utility', country: 'HN', keywords: ['enee'], domains: ['enee.hn'] },
     // --- Honduras: telecom, mail -------------------------------------------
     { name: 'Tigo', category: 'telecom', country: 'HN', keywords: ['tigo', 'tigomoney', 'mitigo'], domains: ['tigo.com.hn', 'tigo.com', 'tigomoney.com'] },
     { name: 'Claro', category: 'telecom', country: 'HN', keywords: ['claro'], domains: ['claro.com.hn', 'claro.com'] },
@@ -55,6 +65,8 @@
     { name: 'TikTok', category: 'social', keywords: ['tiktok'], domains: ['tiktok.com'] },
     // --- Global: shopping, streaming ----------------------------------------
     { name: 'Amazon', category: 'shopping', keywords: ['amazon'], domains: ['amazon.com', 'amazon.com.mx', 'amazon.es'] },
+    { name: 'Temu', category: 'shopping', keywords: ['temu'], domains: ['temu.com'] },
+    { name: 'Shein', category: 'shopping', keywords: ['shein'], domains: ['shein.com'] },
     { name: 'Netflix', category: 'streaming', keywords: ['netflix'], domains: ['netflix.com'] },
     { name: 'Spotify', category: 'streaming', keywords: ['spotify'], domains: ['spotify.com'] },
     // --- Global: gaming ------------------------------------------------------

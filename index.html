@@ -14,11 +14,16 @@
     - scripts, styles and fonts only from this site (no CDNs, no Google Fonts)
     - the only network request allowed is the Have I Been Pwned range API
     - no plugins, no <base> tag tricks, no form submissions anywhere
-    - Trusted Types: the browser itself blocks any attempt to inject HTML
+    - Trusted Types: the browser itself blocks any attempt to inject HTML.
+      The only policy ("sg-sw") lets the page load exactly one file as a
+      service worker: sw.js
+    - blob: images and media only for the photo preview and the camera
   -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file:; font-src 'self' file:; img-src 'self' data:; connect-src https://api.pwnedpasswords.com; base-uri 'none'; form-action 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file:; font-src 'self' file:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src https://api.pwnedpasswords.com; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types sg-sw; upgrade-insecure-requests">
   <meta name="referrer" content="no-referrer">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23000'/%3E%3Cpath d='M16 6.5 9 9.3v5.2c0 4.6 3 8.3 7 9.5 4-1.2 7-4.9 7-9.5V9.3z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='m12.8 15.6 2.3 2.3 4.3-4.6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body data-mode="basic">
@@ -64,6 +69,25 @@
       </div>
     </section>
 
+    <!-- ============================ QUICK START ========================= -->
+    <section class="quick" aria-labelledby="quick-title">
+      <h2 class="quick-title" id="quick-title" data-i18n="quick.title"></h2>
+      <div class="quick-grid">
+        <a class="quick-card" href="#analyzer" data-goto="analyzer"><span class="emoji" aria-hidden="true">🔑</span><strong data-i18n="page.analyzer"></strong><span data-i18n="quick.analyzer"></span></a>
+        <a class="quick-card" href="#phishing" data-goto="phishing"><span class="emoji" aria-hidden="true">🔗</span><strong data-i18n="page.phishing"></strong><span data-i18n="quick.phishing"></span></a>
+        <a class="quick-card" href="#scam" data-goto="scam"><span class="emoji" aria-hidden="true">💬</span><strong data-i18n="page.scam"></strong><span data-i18n="quick.scam"></span></a>
+        <a class="quick-card" href="#qr" data-goto="qr"><span class="emoji" aria-hidden="true">📷</span><strong data-i18n="page.qr"></strong><span data-i18n="quick.qr"></span></a>
+        <a class="quick-card" href="#email" data-goto="email"><span class="emoji" aria-hidden="true">📧</span><strong data-i18n="page.email"></strong><span data-i18n="quick.email"></span></a>
+        <a class="quick-card" href="#meta" data-goto="meta"><span class="emoji" aria-hidden="true">📍</span><strong data-i18n="page.meta"></strong><span data-i18n="quick.meta"></span></a>
+        <a class="quick-card" href="#breach" data-goto="breach"><span class="emoji" aria-hidden="true">💧</span><strong data-i18n="page.breach"></strong><span data-i18n="quick.breach"></span></a>
+        <a class="quick-card" href="#generator" data-goto="generator"><span class="emoji" aria-hidden="true">🎲</span><strong data-i18n="page.generator"></strong><span data-i18n="quick.generator"></span></a>
+        <a class="quick-card" href="#hash" data-goto="hash"><span class="emoji" aria-hidden="true">🧬</span><strong data-i18n="page.hash"></strong><span data-i18n="quick.hash"></span></a>
+        <a class="quick-card" href="#quiz" data-goto="quiz"><span class="emoji" aria-hidden="true">🎯</span><strong data-i18n="page.quiz"></strong><span data-i18n="quick.quiz"></span></a>
+        <a class="quick-card" href="#checkup" data-goto="checkup"><span class="emoji" aria-hidden="true">✅</span><strong data-i18n="page.checkup"></strong><span data-i18n="quick.checkup"></span></a>
+        <a class="quick-card" href="#glossary" data-goto="glossary"><span class="emoji" aria-hidden="true">📖</span><strong data-i18n="page.glossary"></strong><span data-i18n="quick.glossary"></span></a>
+      </div>
+    </section>
+
     <!-- ============================ WORKSPACE =========================== -->
     <section class="workspace" id="workspace" tabindex="-1">
       <div class="window" role="region" data-i18n-aria="window.label">
@@ -72,7 +96,12 @@
             <span class="ws-avatar" aria-hidden="true">S</span>
             <span>SworfishGuard</span>
           </div>
-          <nav class="page-nav" aria-label="Tools">
+          <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="page-nav">
+            <span class="emoji" id="nav-toggle-emoji" aria-hidden="true"></span>
+            <span class="nav-toggle-text"><small data-i18n="nav.pick"></small><span id="nav-toggle-label"></span></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <nav class="page-nav" id="page-nav" aria-label="Tools">
             <p class="nav-group" data-i18n="group.passwords"></p>
             <button type="button" class="nav-item" data-page="analyzer" aria-controls="page-analyzer"><span class="emoji" aria-hidden="true">🔑</span><span data-i18n="page.analyzer"></span></button>
             <button type="button" class="nav-item" data-page="breach" aria-controls="page-breach"><span class="emoji" aria-hidden="true">💧</span><span data-i18n="page.breach"></span></button>
@@ -80,9 +109,13 @@
             <p class="nav-group" data-i18n="group.links"></p>
             <button type="button" class="nav-item" data-page="phishing" aria-controls="page-phishing"><span class="emoji" aria-hidden="true">🔗</span><span data-i18n="page.phishing"></span></button>
             <button type="button" class="nav-item" data-page="scam" aria-controls="page-scam"><span class="emoji" aria-hidden="true">💬</span><span data-i18n="page.scam"></span></button>
+            <button type="button" class="nav-item" data-page="qr" aria-controls="page-qr"><span class="emoji" aria-hidden="true">📷</span><span data-i18n="page.qr"></span></button>
+            <button type="button" class="nav-item" data-page="email" aria-controls="page-email"><span class="emoji" aria-hidden="true">📧</span><span data-i18n="page.email"></span></button>
             <p class="nav-group" data-i18n="group.files"></p>
+            <button type="button" class="nav-item" data-page="meta" aria-controls="page-meta"><span class="emoji" aria-hidden="true">📍</span><span data-i18n="page.meta"></span></button>
             <button type="button" class="nav-item" data-page="hash" aria-controls="page-hash"><span class="emoji" aria-hidden="true">🧬</span><span data-i18n="page.hash"></span></button>
             <p class="nav-group" data-i18n="group.learn"></p>
+            <button type="button" class="nav-item" data-page="quiz" aria-controls="page-quiz"><span class="emoji" aria-hidden="true">🎯</span><span data-i18n="page.quiz"></span></button>
             <button type="button" class="nav-item" data-page="checkup" aria-controls="page-checkup"><span class="emoji" aria-hidden="true">✅</span><span data-i18n="page.checkup"></span></button>
             <button type="button" class="nav-item" data-page="glossary" aria-controls="page-glossary"><span class="emoji" aria-hidden="true">📖</span><span data-i18n="page.glossary"></span></button>
           </nav>
@@ -102,37 +135,62 @@
               <button type="button" class="icon-btn" data-clear="an-input" data-i18n-aria="common.clear"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
             </div>
 
+            <details class="personal" id="an-personal">
+              <summary data-i18n="an.personal"></summary>
+              <p class="hint-text" data-i18n="an.personalHint"></p>
+              <div class="personal-grid">
+                <label class="select-field"><span data-i18n="an.p.name"></span>
+                  <input id="an-p-name" class="input" type="text" maxlength="100" autocomplete="off" spellcheck="false" data-personal data-i18n-placeholder="an.p.namePh"></label>
+                <label class="select-field"><span data-i18n="an.p.birth"></span>
+                  <input id="an-p-birth" class="input" type="date" autocomplete="off" data-personal></label>
+                <label class="select-field wide"><span data-i18n="an.p.other"></span>
+                  <input id="an-p-other" class="input" type="text" maxlength="100" autocomplete="off" spellcheck="false" data-personal data-i18n-placeholder="an.p.otherPh"></label>
+              </div>
+            </details>
+
             <div class="meter" id="an-meter" data-score="-1" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
             <p class="meter-label" id="an-score" aria-live="polite"></p>
             <p class="empty" id="an-empty" data-i18n="an.empty"></p>
 
             <div id="an-results" hidden>
+              <p class="verdict-line" id="an-summary"></p>
               <div class="stat-grid">
                 <div class="stat"><span class="stat-label" data-i18n="an.online"></span><strong id="an-online"></strong><small data-i18n="an.onlineHint"></small></div>
                 <div class="stat"><span class="stat-label" data-i18n="an.offline"></span><strong id="an-offline"></strong><small data-i18n="an.offlineHint"></small></div>
-                <div class="stat"><span class="stat-label" data-i18n="an.entropy"></span><strong id="an-entropy"></strong><small data-i18n="an.bits"></small></div>
-                <div class="stat"><span class="stat-label" data-i18n="an.length"></span><strong id="an-length"></strong><small data-i18n="an.chars"></small></div>
               </div>
 
-              <h3 class="block-title" data-i18n="an.classes"></h3>
-              <div class="tags" id="an-classes"></div>
+              <h3 class="block-title" data-i18n="an.howTitle"></h3>
+              <p class="hint-text" data-i18n="an.howHint"></p>
+              <div class="pieces" id="an-pieces"></div>
+              <ol class="piece-list" id="an-piece-list"></ol>
+              <p class="pieces-total" id="an-total"></p>
 
               <div class="two-col">
                 <div>
-                  <h3 class="block-title" data-i18n="an.patterns"></h3>
-                  <ul class="rows" id="an-patterns"></ul>
+                  <h3 class="block-title" data-i18n="an.weak"></h3>
+                  <ul class="rows" id="an-warnings"></ul>
                 </div>
                 <div>
                   <h3 class="block-title" data-i18n="an.suggestions"></h3>
                   <ul class="todo" id="an-feedback"></ul>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary" id="an-to-breach" data-i18n="an.toBreach"></button>
+
+              <div class="example-box" id="an-example" hidden>
+                <span class="stat-label" data-i18n="an.exampleTitle"></span>
+                <code class="mono" id="an-example-pw"></code>
+                <small id="an-example-time"></small>
+                <div class="btn-row">
+                  <button type="button" class="btn btn-secondary" id="an-to-gen" data-i18n="an.toGen"></button>
+                  <button type="button" class="btn btn-secondary-2" id="an-to-breach" data-i18n="an.toBreach"></button>
+                </div>
+              </div>
 
               <details class="toggle x-only" data-expert>
                 <summary data-i18n="common.expert"></summary>
                 <p data-i18n="an.x"></p>
                 <dl class="props" id="an-x-props"></dl>
+                <table class="data-table" id="an-x-times"><caption data-i18n="an.x.times"></caption><tbody></tbody></table>
                 <table class="data-table" id="an-x-table"><caption data-i18n="an.x.table"></caption><tbody></tbody></table>
               </details>
             </div>
@@ -182,7 +240,9 @@
             <div class="segmented big" role="radiogroup" data-i18n-aria="gen.type">
               <button type="button" role="radio" data-gen-type="passphrase" data-i18n="gen.typePassphrase"></button>
               <button type="button" role="radio" data-gen-type="password" data-i18n="gen.typePassword"></button>
+              <button type="button" role="radio" data-gen-type="pin" data-i18n="gen.typePin"></button>
             </div>
+            <p class="hint-text" id="gen-type-hint"></p>
 
             <div class="gen-box">
               <output id="gen-output" class="mono" aria-live="polite"></output>
@@ -195,6 +255,7 @@
               <div class="meter small" id="gen-meter" data-score="-1" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
               <span id="gen-meta"></span>
             </div>
+            <p class="gen-time" id="gen-time"></p>
 
             <div class="options" id="gen-pp-opts">
               <label class="slider"><span><span data-i18n="gen.words"></span>: <b id="gen-words-value">6</b></span>
@@ -207,7 +268,13 @@
                   <option value=" " data-i18n="gen.sepSpace"></option>
                 </select></label>
               <label class="check"><input type="checkbox" id="gen-cap"> <span data-i18n="gen.capitalize"></span></label>
-              <label class="check"><input type="checkbox" id="gen-num" checked> <span data-i18n="gen.addNumber"></span></label>
+              <label class="check"><input type="checkbox" id="gen-num"> <span data-i18n="gen.addNumber"></span></label>
+              <label class="check"><input type="checkbox" id="gen-sym"> <span data-i18n="gen.addSymbol"></span></label>
+              <label class="select-field"><span data-i18n="gen.lang"></span>
+                <select id="gen-lang" class="input">
+                  <option value="es">Español</option>
+                  <option value="en">English</option>
+                </select></label>
             </div>
 
             <div class="options" id="gen-pw-opts" hidden>
@@ -218,6 +285,15 @@
               <label class="check"><input type="checkbox" id="gen-digits" checked> <span data-i18n="gen.digits"></span></label>
               <label class="check"><input type="checkbox" id="gen-symbols" checked> <span data-i18n="gen.symbols"></span></label>
               <label class="check"><input type="checkbox" id="gen-ambiguous"> <span data-i18n="gen.ambiguous"></span></label>
+            </div>
+
+            <div class="options" id="gen-pin-opts" hidden>
+              <label class="select-field"><span data-i18n="gen.pinLength"></span>
+                <select id="gen-pin-len" class="input">
+                  <option value="4">4</option>
+                  <option value="6">6</option>
+                </select></label>
+              <p class="hint-text wide" id="gen-pin-note"></p>
             </div>
 
             <button type="button" class="btn btn-secondary" id="gen-analyze" data-i18n="gen.analyze"></button>
@@ -265,8 +341,10 @@
                 <span data-i18n="ph.realDomain"></span>
                 <strong class="mono" id="ph-real-domain"></strong>
               </div>
+              <div class="anatomy" id="ph-anatomy" aria-label=""></div>
               <h3 class="block-title" data-i18n="ph.findings"></h3>
               <ul class="rows findings" id="ph-findings"></ul>
+              <div class="advice" id="ph-advice"></div>
 
               <details class="toggle x-only" data-expert>
                 <summary data-i18n="common.expert"></summary>
@@ -309,8 +387,18 @@
                 <span class="verdict-score" id="sc-score"></span>
               </div>
               <p class="fine-print" id="sc-truncated" hidden data-i18n="sc.truncated"></p>
+              <div class="scam-type" id="sc-type" hidden>
+                <span class="stat-label" data-i18n="sc.typeLabel"></span>
+                <strong id="sc-type-name"></strong>
+                <p id="sc-type-how"></p>
+              </div>
+              <h3 class="block-title" data-i18n="sc.marked"></h3>
+              <p class="marked" id="sc-marked"></p>
+              <p class="legend-line"><mark class="sev-critical">&nbsp;</mark> <span data-i18n="sc.legendStrong"></span> <mark class="sev-medium">&nbsp;</mark> <span data-i18n="sc.legendWeak"></span></p>
               <h3 class="block-title" data-i18n="sc.findings"></h3>
               <ul class="rows findings" id="sc-findings"></ul>
+              <ul class="rows good-signs" id="sc-legit"></ul>
+              <div class="advice" id="sc-advice"></div>
               <h3 class="block-title" data-i18n="sc.links"></h3>
               <ul class="rows" id="sc-links"></ul>
 
@@ -321,6 +409,116 @@
               </details>
             </div>
             <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="sc.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= QR CODES ======================= -->
+          <section class="page" id="page-qr" data-page-id="qr" aria-labelledby="h-qr" hidden>
+            <div class="page-icon" aria-hidden="true">📷</div>
+            <h2 class="page-title" id="h-qr" data-i18n="qr.title"></h2>
+            <p class="lead" data-i18n="qr.lead"></p>
+
+            <div class="qr-inputs">
+              <label class="dropzone" id="qr-drop" for="qr-file">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/></svg>
+                <span class="dz-title" data-i18n="qr.drop"></span>
+                <span class="dz-sub"><span data-i18n="fh.or"></span> <span class="link-like" data-i18n="qr.pick"></span></span>
+                <span class="dz-limit" data-i18n="qr.paste"></span>
+                <input type="file" id="qr-file" class="visually-hidden" accept="image/*">
+              </label>
+              <button type="button" class="btn btn-secondary btn-lg" id="qr-camera-btn">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                <span data-i18n="qr.camera"></span>
+              </button>
+            </div>
+
+            <div class="qr-camera" id="qr-camera" hidden>
+              <video id="qr-video" playsinline muted></video>
+              <span class="qr-frame" aria-hidden="true"></span>
+              <button type="button" class="btn btn-secondary-2" id="qr-stop" data-i18n="qr.stop"></button>
+            </div>
+            <p class="status-line" id="qr-status" aria-live="polite"></p>
+
+            <div id="qr-result" hidden>
+              <span class="field-label" data-i18n="qr.content"></span>
+              <div class="qr-content">
+                <span class="tag info" id="qr-type"></span>
+                <code class="hash-code" id="qr-text"></code>
+              </div>
+              <div class="verdict" id="qr-verdict">
+                <span class="verdict-dot" aria-hidden="true"></span>
+                <div class="verdict-text">
+                  <strong id="qr-level"></strong>
+                  <p id="qr-hint"></p>
+                </div>
+                <span class="verdict-score" id="qr-score"></span>
+              </div>
+              <div class="real-domain" id="qr-real">
+                <span data-i18n="ph.realDomain"></span>
+                <strong class="mono" id="qr-real-domain"></strong>
+              </div>
+              <dl class="props" id="qr-props"></dl>
+              <h3 class="block-title" data-i18n="qr.findings"></h3>
+              <ul class="rows findings" id="qr-findings"></ul>
+              <div class="btn-row">
+                <button type="button" class="btn btn-secondary" id="qr-copy" data-i18n="qr.copy"></button>
+                <button type="button" class="btn btn-secondary-2" id="qr-again" data-i18n="qr.again"></button>
+              </div>
+              <details class="toggle x-only" data-expert>
+                <summary data-i18n="common.expert"></summary>
+                <p data-i18n="qr.x"></p>
+                <dl class="props" id="qr-x-props"></dl>
+              </details>
+            </div>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="qr.b"></p></div></aside>
+            <p class="fine-print" data-i18n="qr.never"></p>
+          </section>
+
+          <!-- ======================= EMAIL HEADERS ======================= -->
+          <section class="page" id="page-email" data-page-id="email" aria-labelledby="h-email" hidden>
+            <div class="page-icon" aria-hidden="true">📧</div>
+            <h2 class="page-title" id="h-email" data-i18n="em.title"></h2>
+            <p class="lead" data-i18n="em.lead"></p>
+
+            <details class="toggle how">
+              <summary data-i18n="em.howTitle"></summary>
+              <ol class="steps">
+                <li data-i18n="em.how.gmail"></li>
+                <li data-i18n="em.how.outlook"></li>
+                <li data-i18n="em.how.other"></li>
+              </ol>
+            </details>
+
+            <form id="em-form" novalidate>
+              <label class="field-label" for="em-input" data-i18n="em.label"></label>
+              <textarea id="em-input" class="input mono small-mono" rows="8" maxlength="200000" spellcheck="false" autocomplete="off" data-i18n-placeholder="em.placeholder"></textarea>
+              <div class="form-actions btn-row">
+                <button type="submit" class="btn btn-primary" data-i18n="em.button"></button>
+                <button type="button" class="btn btn-secondary-2" id="em-example" data-i18n="em.example"></button>
+              </div>
+            </form>
+            <p class="status-line" id="em-status" aria-live="polite"></p>
+
+            <div id="em-result" hidden>
+              <div class="verdict" id="em-verdict">
+                <span class="verdict-dot" aria-hidden="true"></span>
+                <div class="verdict-text">
+                  <strong id="em-level"></strong>
+                  <p id="em-hint"></p>
+                </div>
+                <span class="verdict-score" id="em-score"></span>
+              </div>
+              <div class="auth-grid" id="em-auth"></div>
+              <dl class="props" id="em-props"></dl>
+              <h3 class="block-title" data-i18n="em.findings"></h3>
+              <ul class="rows findings" id="em-findings"></ul>
+              <details class="toggle x-only" data-expert>
+                <summary data-i18n="common.expert"></summary>
+                <p data-i18n="em.x"></p>
+                <table class="data-table" id="em-hops"><caption data-i18n="em.hops"></caption><tbody></tbody></table>
+                <table class="data-table" id="em-x-breakdown"><caption data-i18n="ph.x.breakdown"></caption><tbody></tbody></table>
+              </details>
+            </div>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="em.b"></p></div></aside>
           </section>
 
           <!-- ======================= FILE HASH ======================= -->
@@ -353,6 +551,96 @@
               </details>
             </div>
             <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="fh.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= PHOTO METADATA ======================= -->
+          <section class="page" id="page-meta" data-page-id="meta" aria-labelledby="h-meta" hidden>
+            <div class="page-icon" aria-hidden="true">📍</div>
+            <h2 class="page-title" id="h-meta" data-i18n="md.title"></h2>
+            <p class="lead" data-i18n="md.lead"></p>
+
+            <label class="dropzone" id="md-drop" for="md-file">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>
+              <span class="dz-title" data-i18n="md.drop"></span>
+              <span class="dz-sub"><span data-i18n="fh.or"></span> <span class="link-like" data-i18n="md.pick"></span></span>
+              <span class="dz-limit" data-i18n="md.limit"></span>
+              <input type="file" id="md-file" class="visually-hidden" accept="image/*">
+            </label>
+            <p class="status-line" id="md-status" aria-live="polite"></p>
+
+            <div id="md-result" hidden>
+              <div class="md-top">
+                <img id="md-preview" alt="" decoding="async">
+                <div class="md-top-text">
+              <div class="verdict" id="md-verdict">
+                <span class="verdict-dot" aria-hidden="true"></span>
+                <div class="verdict-text">
+                  <strong id="md-level"></strong>
+                  <p id="md-hint"></p>
+                </div>
+                <span class="verdict-score" id="md-score"></span>
+              </div>
+                </div>
+              </div>
+              <div class="md-gps" id="md-gps" hidden>
+                <span class="md-pin" aria-hidden="true">📍</span>
+                <div>
+                  <strong data-i18n="md.gpsTitle"></strong>
+                  <p class="mono" id="md-gps-coords"></p>
+                  <a id="md-map" target="_blank" rel="noopener noreferrer" data-i18n="md.map"></a>
+                </div>
+              </div>
+              <h3 class="block-title" data-i18n="md.found"></h3>
+              <dl class="props" id="md-props"></dl>
+              <div class="md-clean">
+                <a class="btn btn-primary btn-lg" id="md-download" data-i18n="md.download"></a>
+                <p class="fine-print" id="md-clean-note"></p>
+              </div>
+              <details class="toggle x-only" data-expert>
+                <summary data-i18n="common.expert"></summary>
+                <p data-i18n="md.x"></p>
+                <dl class="props" id="md-x-props"></dl>
+              </details>
+            </div>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="md.b"></p></div></aside>
+          </section>
+
+          <!-- ======================= QUIZ ======================= -->
+          <section class="page" id="page-quiz" data-page-id="quiz" aria-labelledby="h-quiz" hidden>
+            <div class="page-icon" aria-hidden="true">🎯</div>
+            <h2 class="page-title" id="h-quiz" data-i18n="qz.title"></h2>
+            <p class="lead" data-i18n="qz.lead"></p>
+
+            <div id="qz-play">
+              <div class="qz-bar">
+                <span id="qz-progress"></span>
+                <span id="qz-points"></span>
+              </div>
+              <div class="progress"><i id="qz-bar"></i></div>
+              <article class="qz-card" id="qz-card" aria-live="polite">
+                <div class="qz-head">
+                  <span class="tag blue" id="qz-kind"></span>
+                  <span class="qz-from" id="qz-from"></span>
+                </div>
+                <p class="qz-text" id="qz-text"></p>
+              </article>
+              <div class="qz-actions" id="qz-actions">
+                <button type="button" class="btn btn-lg qz-btn real" id="qz-real"><span aria-hidden="true">✅</span> <span data-i18n="qz.real"></span></button>
+                <button type="button" class="btn btn-lg qz-btn scam" id="qz-scam"><span aria-hidden="true">🚩</span> <span data-i18n="qz.scam"></span></button>
+              </div>
+              <div class="result" id="qz-feedback" aria-live="polite" hidden></div>
+              <button type="button" class="btn btn-primary btn-lg" id="qz-next" hidden></button>
+            </div>
+
+            <div class="qz-end" id="qz-end" hidden>
+              <span class="stat-label" data-i18n="qz.score"></span>
+              <strong class="qz-score" id="qz-score"></strong>
+              <p id="qz-level"></p>
+              <h3 class="block-title" id="qz-review-title" data-i18n="qz.review"></h3>
+              <ul class="rows" id="qz-review"></ul>
+              <button type="button" class="btn btn-primary btn-lg" id="qz-restart" data-i18n="qz.restart"></button>
+            </div>
+            <aside class="callout b-only"><span class="emoji" aria-hidden="true">💡</span><div><strong data-i18n="common.simple"></strong><p data-i18n="qz.b"></p></div></aside>
           </section>
 
           <!-- ======================= CHECKUP ======================= -->
@@ -433,7 +721,9 @@
         <a href="#analyzer" data-goto="analyzer" data-i18n="page.analyzer"></a>
         <a href="#phishing" data-goto="phishing" data-i18n="page.phishing"></a>
         <a href="#scam" data-goto="scam" data-i18n="page.scam"></a>
-        <a href="#checkup" data-goto="checkup" data-i18n="page.checkup"></a>
+        <a href="#qr" data-goto="qr" data-i18n="page.qr"></a>
+        <a href="#meta" data-goto="meta" data-i18n="page.meta"></a>
+        <a href="#quiz" data-goto="quiz" data-i18n="page.quiz"></a>
       </nav>
       <nav class="footer-col" aria-labelledby="ft-project">
         <p class="footer-head" id="ft-project" data-i18n="ft.project"></p>
@@ -450,11 +740,17 @@
   <script src="js/i18n.js"></script>
   <script src="js/brands.js"></script>
   <script src="js/wordlists.js"></script>
+  <script src="js/dictionaries.js"></script>
   <script src="js/password-analyzer.js"></script>
   <script src="js/breach-check.js"></script>
   <script src="js/generator.js"></script>
   <script src="js/phishing-detector.js"></script>
   <script src="js/scam-detector.js"></script>
+  <script src="js/vendor/jsQR.js"></script>
+  <script src="js/qr-scanner.js"></script>
+  <script src="js/email-headers.js"></script>
+  <script src="js/metadata.js"></script>
+  <script src="js/quiz.js"></script>
   <script src="js/file-hash.js"></script>
   <script src="js/checkup.js"></script>
   <script src="js/glossary.js"></script>

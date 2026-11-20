@@ -37,9 +37,19 @@ test('look-alike and typo domains are high risk', () => {
 test('brand placed in the subdomain is detected (bancatlan.hn.evil.top)', () => {
   const r = analyzeUrl('https://bancatlan.hn.verificar-cuenta.top/acceso');
   assert.equal(r.registeredDomain, 'verificar-cuenta.top');
-  assert.ok(ids(r).includes('brandInSubdomain'));
+  assert.ok(ids(r).includes('domainInSubdomain'), 'a full official domain used as a prefix is critical');
   assert.ok(ids(r).includes('riskyTld'));
   assert.equal(r.level, 'high');
+  const steam = analyzeUrl('https://steamcommunity.com.trade-offer.ru/tradeoffer/new');
+  assert.equal(steam.findings[0].id, 'domainInSubdomain');
+  assert.equal(steam.findings[0].detail, 'steamcommunity.com');
+  assert.equal(steam.level, 'high');
+});
+
+test('only the brand name in the subdomain is still flagged (paypal.login.example.net)', () => {
+  const r = analyzeUrl('https://paypal.login-seguro.example.net/');
+  assert.ok(ids(r).includes('brandInSubdomain'));
+  assert.ok(!ids(r).includes('domainInSubdomain'));
 });
 
 test('short brand keywords only match whole words (no false positives)', () => {
